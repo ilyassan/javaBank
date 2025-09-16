@@ -25,6 +25,13 @@ public abstract class Account {
         return String.format("CPT-%05d", counter++);
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
 
     public abstract boolean withdraw(double amount);
     public abstract double calculateInterest();

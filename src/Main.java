@@ -13,7 +13,7 @@ public class Main {
             int choice = getIntInput();
 
             switch (choice) {
-                case 1: break;
+                case 1: createAccount(); break;
                 case 2: break;
                 case 3: break;
                 case 4: break;
@@ -52,9 +52,15 @@ public class Main {
 
         switch (choice) {
             case 1:
+                SavingsAccount savingsAccount = SavingsAccount.create();
+                System.out.printf("Savings account created successfully!\nCode: %s\nInitial balance: %.2f DH\n",
+                        savingsAccount.getCode(), savingsAccount.getBalance());
                 pauseBeforeMenu();
                 break;
             case 2:
+                CurrentAccount currentAccount = CurrentAccount.create();
+                System.out.printf("Current account created successfully!\nCode: %s\nInitial balance: %.2f DH\nOverdraft limit: %.2f DH\n",
+                        currentAccount.getCode(), currentAccount.getBalance(), currentAccount.getOverdraft());
                 pauseBeforeMenu();
                 break;
             case 3: return;
