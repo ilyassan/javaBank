@@ -22,7 +22,10 @@ public class SavingsAccount extends Account {
 
     @Override
     public boolean withdraw(double amount) {
-        System.out.println("Withdrawal not allowed from Savings Account. This account is for saving only.");
+        if (amount <= balance) {
+            balance -= amount;
+            return true;
+        }
         return false;
     }
 

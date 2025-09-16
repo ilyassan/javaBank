@@ -1,9 +1,10 @@
+import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    final private static Scanner scanner = new Scanner(System.in);
+    private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         System.out.println("=== Welcome to YouBank ===");
@@ -18,7 +19,7 @@ public class Main {
                 case 3: makeDeposit(); break;
                 case 4: makeWithdrawal(); break;
                 case 5: transferMoney(); break;
-                case 6: break;
+                case 6: viewTransactionHistory(); break;
                 case 7:
                     System.out.println("Thank you for using YouBank!");
                     System.exit(0);
@@ -168,6 +169,27 @@ public class Main {
         } else {
             System.out.println("Invalid amount. Please enter a positive number.");
         }
+        pauseBeforeMenu();
+    }
+
+    private static void viewTransactionHistory() {
+        Account account = selectAccount();
+        if (account != null) {
+            List<Operation> operations = account.getOperationsList();
+
+            if (operations.isEmpty()) {
+                System.out.println("No transactions found for this account.");
+                return;
+            }
+
+            System.out.println("\n=== TRANSACTION HISTORY ===");
+            System.out.printf("Account: %s - Current balance: %.2f DH\n", account.getCode(), account.getBalance());
+            System.out.println(String.join("", Collections.nCopies(60, "-")));
+
+            for (Operation operation : operations) {
+                System.out.println(operation.getDetails());
+            }
+        };
         pauseBeforeMenu();
     }
 
