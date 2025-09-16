@@ -1,11 +1,11 @@
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     final private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-
         System.out.println("=== Welcome to YouBank ===");
 
         while (true) {
@@ -14,10 +14,10 @@ public class Main {
 
             switch (choice) {
                 case 1: createAccount(); break;
-                case 2: break;
-                case 3: break;
-                case 4: break;
-                case 5: break;
+                case 2: checkBalance(); break;
+                case 3: makeDeposit(); break;
+                case 4: makeWithdrawal(); break;
+                case 5: transferMoney(); break;
                 case 6: break;
                 case 7:
                     System.out.println("Thank you for using YouBank!");
@@ -76,12 +76,16 @@ public class Main {
         System.out.print("Choose an option: ");
 
         int choice = getIntInput();
+        Account account = null;
 
         switch (choice) {
             case 1:
                 System.out.print("Enter account code (CPT-XXXXX): ");
+                String accountCode = scanner.nextLine();
+                account = Account.searchAccount(accountCode);
                 break;
             case 2:
+                account = selectAccount();
                 break;
             case 3:
                 return;
@@ -91,7 +95,107 @@ public class Main {
                 return;
         }
 
+        if (account != null) {
+            account.displayDetails();
+        }
         pauseBeforeMenu();
+    }
+
+    private static void makeDeposit() {
+        Account account = selectAccount();
+        if (account != null) {
+            System.out.print("Enter deposit amount: ");
+            double amount = getDoubleInput();
+
+            if (amount > 0) {
+                System.out.print("Source of deposit (optional): ");
+                String source = scanner.nextLine();
+                if (source.trim().isEmpty()) {
+                    source = "Cash deposit";
+                }
+
+                if (Account.processDeposit(account.getCode(), amount, source)) {
+                    System.out.printf("Deposit successful! New balance: %.2f DH\n", account.getBalance());
+                }
+            } else {
+                System.out.println("Invalid amount. Please enter a positive number.");
+            }
+        }
+        pauseBeforeMenu();
+    }
+
+    private static void makeWithdrawal() {
+        Account account = selectAccount();
+        if (account != null) {
+            System.out.print("Enter withdrawal amount: ");
+            double amount = getDoubleInput();
+
+            if (amount > 0) {
+                System.out.print("Destination of withdrawal (optional): ");
+                String destination = scanner.nextLine();
+                if (destination.trim().isEmpty()) {
+                    destination = "ATM withdrawal";
+                }
+
+                if (Account.processWithdrawal(account.getCode(), amount, destination)) {
+                    System.out.printf("Withdrawal successful! New balance: %.2f DH\n", account.getBalance());
+                }
+            } else {
+                System.out.println("Invalid amount. Please enter a positive number.");
+            }
+        }
+        pauseBeforeMenu();
+    }
+
+    private static void transferMoney() {
+        System.out.println("\n=== SOURCE ACCOUNT ===");
+        Account sourceAccount = selectAccount();
+        if (sourceAccount == null) return;
+
+        System.out.println("\n=== DESTINATION ACCOUNT ===");
+        Account destinationAccount = selectAccount();
+        if (destinationAccount == null) return;
+
+        System.out.print("Enter transfer amount: ");
+        double amount = getDoubleInput();
+
+        if (amount > 0) {
+            if (Account.processTransfer(sourceAccount.getCode(), destinationAccount.getCode(), amount)) {
+                System.out.println("Transfer successful!");
+                System.out.printf("Source account (%s): %.2f DH\n", sourceAccount.getCode(), sourceAccount.getBalance());
+                System.out.printf("Destination account (%s): %.2f DH\n", destinationAccount.getCode(), destinationAccount.getBalance());
+            }
+        } else {
+            System.out.println("Invalid amount. Please enter a positive number.");
+        }
+        pauseBeforeMenu();
+    }
+
+    private static Account selectAccount() {
+        List<Account> allAccounts = Account.getAllAccounts();
+
+        if (allAccounts.isEmpty()) {
+            System.out.println("No accounts found. Please create an account first.");
+            return null;
+        }
+
+        System.out.println("\n=== SELECT ACCOUNT ===");
+        for (int i = 0; i < allAccounts.size(); i++) {
+            Account account = allAccounts.get(i);
+            String type = (account instanceof SavingsAccount) ? "Savings" : "Current";
+            System.out.printf("%d. %s (%s) - Balance: %.2f DH\n",
+                    i + 1, account.getCode(), type, account.getBalance());
+        }
+
+        System.out.print("Select an account: ");
+        int choice = getIntInput();
+
+        if (choice >= 1 && choice <= allAccounts.size()) {
+            return allAccounts.get(choice - 1);
+        } else {
+            System.out.println("Invalid selection.");
+            return null;
+        }
     }
 
     private static int getIntInput() {

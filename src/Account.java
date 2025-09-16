@@ -2,17 +2,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.io.*;
+
 
 public abstract class Account {
     protected String code;
     protected double balance;
     protected List<Operation> operationsList;
 
-    // hashmap for faster search
-    private static HashMap<String, Account> accounts = new HashMap<>();
+    final private static HashMap<String, Account> accounts = new HashMap<>();
     private static int counter = 1;
     private static final Pattern CODE_PATTERN = Pattern.compile("^CPT-\\d{5}$");
+    private static final String DATA_FILE = "youbank_data.txt";
 
     public Account(String code) {
         this.code = code;
@@ -21,8 +21,10 @@ public abstract class Account {
         accounts.put(code, this);
     }
 
-    public static String generateAccountCode() {
-        return String.format("CPT-%05d", counter++);
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+        }
     }
 
     public String getCode() {
@@ -31,6 +33,149 @@ public abstract class Account {
 
     public double getBalance() {
         return balance;
+    }
+
+    public List<Operation> getOperationsList() {
+        return new ArrayList<>(operationsList);
+    }
+
+    public void addOperation(Operation operation) {
+        operationsList.add(operation);
+    }
+
+    public static String generateAccountCode() {
+        return String.format("CPT-%05d", counter++);
+    }
+
+    public static Account findAccountByCode(String code) {
+        return accounts.get(code);
+    }
+
+    public static Account searchAccount(String code) {
+        if (code == null || code.trim().isEmpty()) {
+            System.out.println("Account code cannot be empty.");
+            return null;
+        }
+
+        String searchCode = code.trim().toUpperCase();
+        Account account = findAccountByCode(searchCode);
+
+        if (account == null) {
+            System.out.println("Account with code '" + searchCode + "' not found.");
+        }
+
+        return account;
+    }
+
+    public static List<Account> getAllAccounts() {
+        return new ArrayList<>(accounts.values());
+    }
+
+    public static List<SavingsAccount> getSavingsAccounts() {
+        List<SavingsAccount> savingsAccounts = new ArrayList<>();
+        for (Account account : accounts.values()) {
+            if (account instanceof SavingsAccount) {
+                savingsAccounts.add((SavingsAccount) account);
+            }
+        }
+        return savingsAccounts;
+    }
+
+    public static List<CurrentAccount> getCurrentAccounts() {
+        List<CurrentAccount> currentAccounts = new ArrayList<>();
+        for (Account account : accounts.values()) {
+            if (account instanceof CurrentAccount) {
+                currentAccounts.add((CurrentAccount) account);
+            }
+        }
+        return currentAccounts;
+    }
+
+    public static boolean validateAccountCode(String code) {
+        return code != null && CODE_PATTERN.matcher(code).matches();
+    }
+
+    public static boolean validateAmount(double amount) {
+        return amount > 0;
+    }
+
+    public static boolean processDeposit(String accountCode, double amount, String source) {
+        try {
+            if (!validateAmount(amount)) {
+                throw new IllegalArgumentException("Amount must be positive");
+            }
+
+            Account account = findAccountByCode(accountCode);
+            if (account == null) {
+                throw new IllegalArgumentException("Account not found");
+            }
+
+            Deposit deposit = new Deposit(amount, source);
+            account.deposit(amount);
+            account.addOperation(deposit);
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Error during deposit: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean processWithdrawal(String accountCode, double amount, String destination) {
+        try {
+            if (!validateAmount(amount)) {
+                throw new IllegalArgumentException("Amount must be positive");
+            }
+
+            Account account = findAccountByCode(accountCode);
+            if (account == null) {
+                throw new IllegalArgumentException("Account not found");
+            }
+
+            if (account.withdraw(amount)) {
+                Withdrawal withdrawal = new Withdrawal(amount, destination);
+                account.addOperation(withdrawal);
+                return true;
+            } else {
+                throw new IllegalArgumentException("Insufficient funds");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error during withdrawal: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean processTransfer(String sourceAccountCode, String destinationAccountCode, double amount) {
+        try {
+            if (!validateAmount(amount)) {
+                throw new IllegalArgumentException("Amount must be positive");
+            }
+
+            Account sourceAccount = findAccountByCode(sourceAccountCode);
+            Account destinationAccount = findAccountByCode(destinationAccountCode);
+
+            if (sourceAccount == null || destinationAccount == null) {
+                throw new IllegalArgumentException("Account(s) not found");
+            }
+
+            if (sourceAccountCode.equals(destinationAccountCode)) {
+                throw new IllegalArgumentException("Cannot transfer to the same account");
+            }
+
+            if (processWithdrawal(sourceAccountCode, amount, "Transfer to " + destinationAccountCode)) {
+                if (processDeposit(destinationAccountCode, amount, "Transfer from " + sourceAccountCode)) {
+                    return true;
+                } else {
+                    processDeposit(sourceAccountCode, amount, "Transfer cancellation");
+                }
+            }
+            return false;
+
+        } catch (Exception e) {
+            System.err.println("Error during transfer: " + e.getMessage());
+            return false;
+        }
     }
 
     public abstract boolean withdraw(double amount);

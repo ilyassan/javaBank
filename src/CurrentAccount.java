@@ -23,7 +23,7 @@ public class CurrentAccount extends Account {
 
     @Override
     public boolean withdraw(double amount) {
-        if (amount > 0 && (balance + overdraft) >= amount) {
+        if (balance != 0 && (amount > 0 && (balance + overdraft) >= amount)) {
             balance -= amount;
             return true;
         }
