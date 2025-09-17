@@ -1,7 +1,8 @@
+package Models;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
 
 
 public abstract class Account {
@@ -9,10 +10,8 @@ public abstract class Account {
     protected double balance;
     protected List<Operation> operationsList;
 
-    final private static HashMap<String, Account> accounts = new HashMap<>();
+    private static final HashMap<String, Account> accounts = new HashMap<>();
     private static int counter = 1;
-    private static final Pattern CODE_PATTERN = Pattern.compile("^CPT-\\d{5}$");
-    private static final String DATA_FILE = "youbank_data.txt";
 
     public Account(String code) {
         this.code = code;
@@ -69,30 +68,6 @@ public abstract class Account {
 
     public static List<Account> getAllAccounts() {
         return new ArrayList<>(accounts.values());
-    }
-
-    public static List<SavingsAccount> getSavingsAccounts() {
-        List<SavingsAccount> savingsAccounts = new ArrayList<>();
-        for (Account account : accounts.values()) {
-            if (account instanceof SavingsAccount) {
-                savingsAccounts.add((SavingsAccount) account);
-            }
-        }
-        return savingsAccounts;
-    }
-
-    public static List<CurrentAccount> getCurrentAccounts() {
-        List<CurrentAccount> currentAccounts = new ArrayList<>();
-        for (Account account : accounts.values()) {
-            if (account instanceof CurrentAccount) {
-                currentAccounts.add((CurrentAccount) account);
-            }
-        }
-        return currentAccounts;
-    }
-
-    public static boolean validateAccountCode(String code) {
-        return code != null && CODE_PATTERN.matcher(code).matches();
     }
 
     public static boolean validateAmount(double amount) {

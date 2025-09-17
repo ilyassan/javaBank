@@ -1,3 +1,5 @@
+package Models;
+
 public class CurrentAccount extends Account {
     private double overdraft;
     public static final double DEFAULT_OVERDRAFT = 500;
