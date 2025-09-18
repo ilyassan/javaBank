@@ -1,12 +1,20 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import controllers.MainController;
+import models.Account;
+import models.SavingsAccount;
 
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         System.out.println("=== Welcome to YouBank ===");
+
+        executeScheduledIntrestRateIncrementation();
 
         while (true) {
             showMainMenu();
@@ -27,6 +35,19 @@ public class Main {
                     System.out.println("Invalid option. Please try again.");
             }
         }
+    }
+
+    private static void executeScheduledIntrestRateIncrementation() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        // Schedule the task to run every 5 seconds
+        scheduler.scheduleAtFixedRate(() -> {
+            for (Account account : Account.getAllAccounts()) {
+                if(account instanceof SavingsAccount){
+                    ((SavingsAccount) account).addIntrests();
+                }
+            }
+        }, 0, 5, TimeUnit.SECONDS);
     }
 
     private static void showMainMenu() {
