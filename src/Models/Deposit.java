@@ -1,4 +1,4 @@
-package Models;
+package models;
 
 public class Deposit extends Operation {
     private String source;

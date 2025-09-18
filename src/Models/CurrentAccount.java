@@ -1,4 +1,4 @@
-package Models;
+package models;
 
 public class CurrentAccount extends Account {
     private double overdraft;

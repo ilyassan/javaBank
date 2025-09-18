@@ -1,4 +1,4 @@
-package Models;
+package models;
 
 public class Withdrawal extends Operation {
     private String destination;

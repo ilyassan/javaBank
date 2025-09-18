@@ -1,6 +1,6 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
-import Controllers.MainController;
+import controllers.MainController;
 
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);

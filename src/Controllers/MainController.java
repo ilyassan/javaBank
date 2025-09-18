@@ -1,9 +1,9 @@
-package Controllers;
+package controllers;
 
-import Models.Account;
-import Models.CurrentAccount;
-import Models.Operation;
-import Models.SavingsAccount;
+import models.Account;
+import models.CurrentAccount;
+import models.Operation;
+import models.SavingsAccount;
 
 import java.util.Collections;
 import java.util.InputMismatchException;
